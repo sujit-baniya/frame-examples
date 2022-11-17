@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/client"
-	"github.com/sujit-baniya/frame/pkg/app/server"
-	"github.com/sujit-baniya/frame/pkg/app/server/binding"
+	"github.com/sujit-baniya/frame"
+	"github.com/sujit-baniya/frame/client"
 	"github.com/sujit-baniya/frame/pkg/protocol"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
+	"github.com/sujit-baniya/frame/server/binding"
 	"time"
 )
 
@@ -32,7 +31,7 @@ func init() {
 func main() {
 	h := server.Default(server.WithHostPorts("127.0.0.1:8080"))
 
-	h.GET("customValidate", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("customValidate", func(ctx context.Context, c *frame.Context) {
 		var req ValidateStruct
 		err := c.Bind(&req)
 		if err != nil {

@@ -3,12 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/client"
-	"github.com/sujit-baniya/frame/pkg/app/server"
-	"github.com/sujit-baniya/frame/pkg/app/server/binding"
+	"github.com/sujit-baniya/frame/client"
 	"github.com/sujit-baniya/frame/pkg/protocol"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
+	"github.com/sujit-baniya/frame/pkg/server/binding"
 	"time"
 )
 
@@ -19,7 +17,7 @@ func init() {
 func main() {
 	h := server.Default(server.WithHostPorts("127.0.0.1:8080"))
 
-	h.GET("looseZero", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("looseZero", func(ctx context.Context, c *frame.Context) {
 		type Loose struct {
 			A int `query:"a"`
 		}

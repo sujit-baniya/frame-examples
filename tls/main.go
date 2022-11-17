@@ -4,52 +4,46 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/sujit-baniya/frame"
+	"github.com/sujit-baniya/frame/server"
 	"time"
 
-	"github.com/sujit-baniya/frame/pkg/app/client"
+	"github.com/sujit-baniya/frame/client"
 	"github.com/sujit-baniya/frame/pkg/network/standard"
 	"github.com/sujit-baniya/frame/pkg/protocol"
 
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/server"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
 )
 
 func main() {
 	cfg := &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
-		PreferServerCipherSuites: true,
+		MinVersion:       tls.VersionTLS12,
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 		CipherSuites: []uint16{
 			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 		},
 	}
-	cert, err := tls.LoadX509KeyPair("./server.crt", "./server.key")
+	cert, err := tls.LoadX509KeyPair("./frame.crt", "./frame.key")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	cfg.Certificates = append(cfg.Certificates, cert)
 
-	h := server.Default(server.WithTLS(cfg), server.WithHostPorts(":8443"))
+	h := server.Default(server.WithTLS(cfg), server.WithHostPorts("127.0.0.1:8443"))
 
-	h.Use(func(c context.Context, ctx *app.RequestContext) {
+	h.Use(func(c context.Context, ctx *frame.Context) {
 		fmt.Fprint(ctx, "Before real handle...\n")
 		ctx.Next(c)
 		fmt.Fprint(ctx, "After real handle...\n")
 	})
 
-	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
+	h.GET("/ping", func(c context.Context, ctx *frame.Context) {
 		ctx.String(consts.StatusOK, "TLS test\n")
 	})
 
-	go func() {
-		h.Spin()
-	}()
-
-	time.Sleep(time.Millisecond * 50)
-	doTlsRequest()
+	h.Spin()
 }
 
 func doTlsRequest() {

@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/server"
+	"github.com/sujit-baniya/frame"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
 	"io"
 	"sync"
@@ -25,7 +24,7 @@ func main() {
 	h.Spin()
 }
 
-func handler(ctx context.Context, c *app.RequestContext) {
+func handler(ctx context.Context, c *frame.Context) {
 	// Acquire body streaming
 	bodyStream := c.RequestBodyStream()
 	// Read half of body bytes
@@ -38,13 +37,13 @@ func handler(ctx context.Context, c *app.RequestContext) {
 	c.String(consts.StatusOK, "bytes streaming_read: %d\nbytes left: %d\n", r, len(left))
 }
 
-func handler1(ctx context.Context, c *app.RequestContext) {
+func handler1(ctx context.Context, c *frame.Context) {
 	bs := []byte("hello, hertz!")
 	wb := bytes.NewBuffer(bs)
 	c.SetBodyStream(wb, len(bs))
 }
 
-func handler2(ctx context.Context, c *app.RequestContext) {
+func handler2(ctx context.Context, c *frame.Context) {
 	rw := newChunkReader()
 	// Content-Length may be negative:
 	// -1 means Transfer-Encoding: chunked.

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/server"
+	"github.com/sujit-baniya/frame"
 	"github.com/sujit-baniya/frame/pkg/common/utils"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
+	"github.com/sujit-baniya/frame/server"
 	"net/http"
 	"time"
 )
@@ -20,18 +20,18 @@ func main() {
 	h := server.Default(server.WithHostPorts(":8080"))
 	h.SetHTMLTemplate("./resources", ".html")
 
-	h.GET("/index", func(c context.Context, ctx *app.RequestContext) {
+	h.GET("/index", func(c context.Context, ctx *frame.Context) {
 		ctx.HTML(http.StatusOK, "index", utils.H{
 			"title": "Main website",
 		})
 	})
 
 	// utils.H is a shortcut for map[string]interface{}
-	h.GET("/someJSON", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/someJSON", func(ctx context.Context, c *frame.Context) {
 		c.JSON(consts.StatusOK, utils.H{"message": "hey", "status": consts.StatusOK})
 	})
 
-	h.GET("/moreJSON", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/moreJSON", func(ctx context.Context, c *frame.Context) {
 		// You also can use a struct
 		var msg struct {
 			Company  string `json:"company"`
@@ -46,25 +46,25 @@ func main() {
 		c.JSON(consts.StatusOK, msg)
 	})
 
-	h.GET("/pureJson", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/pureJson", func(ctx context.Context, c *frame.Context) {
 		c.PureJSON(consts.StatusOK, utils.H{
 			"html": "<p> Hello World </p>",
 		})
 	})
 
-	h.GET("/someData", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/someData", func(ctx context.Context, c *frame.Context) {
 		c.Data(consts.StatusOK, "text/plain; charset=utf-8", []byte("hello"))
 	})
 
-	h.GET("/externalRedirect", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/externalRedirect", func(ctx context.Context, c *frame.Context) {
 		c.Redirect(consts.StatusMovedPermanently, []byte("http://www.google.com/"))
 	})
 
-	h.GET("/internalRedirect", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/internalRedirect", func(ctx context.Context, c *frame.Context) {
 		c.Redirect(consts.StatusFound, []byte("/foo"))
 	})
 
-	h.GET("/foo", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/foo", func(ctx context.Context, c *frame.Context) {
 		c.String(consts.StatusOK, "hello, world")
 	})
 

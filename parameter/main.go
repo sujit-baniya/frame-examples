@@ -3,8 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sujit-baniya/frame/pkg/app"
-	"github.com/sujit-baniya/frame/pkg/app/server"
+	"github.com/sujit-baniya/frame"
 	"github.com/sujit-baniya/frame/pkg/protocol"
 	"github.com/sujit-baniya/frame/pkg/protocol/consts"
 	"net/url"
@@ -14,7 +13,7 @@ import (
 func main() {
 	h := server.Default(server.WithHostPorts("127.0.0.1:8080"), server.WithMaxRequestBodySize(20<<20))
 
-	h.GET("/cookie", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/cookie", func(ctx context.Context, c *frame.Context) {
 		mc := "myCookie"
 		// get specific key
 		val := c.Cookie(mc)
@@ -61,7 +60,7 @@ func main() {
 
 	// Query string parameters are parsed using the existing underlying request object.
 	// The request responds to url matching: /welcome?firstname=Jane&lastname=Doe&food=apple&food=fish
-	h.GET("/welcome", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/welcome", func(ctx context.Context, c *frame.Context) {
 		firstname := c.DefaultQuery("firstname", "Guest")
 		// shortcut for c.Request.URL.Query().Get("lastname")
 		lastname := c.Query("lastname")
@@ -77,7 +76,7 @@ func main() {
 		c.String(consts.StatusOK, "Hello %s %s, favorite food: %s", firstname, lastname, favoriteFood)
 	})
 	// content-type : application/x-www-form-urlencoded
-	h.POST("/urlencoded", func(ctx context.Context, c *app.RequestContext) {
+	h.POST("/urlencoded", func(ctx context.Context, c *frame.Context) {
 		name := c.PostForm("name")
 		message := c.PostForm("message")
 
@@ -91,7 +90,7 @@ func main() {
 	})
 
 	// content-type : multipart/form-data
-	h.POST("/formdata", func(ctx context.Context, c *app.RequestContext) {
+	h.POST("/formdata", func(ctx context.Context, c *frame.Context) {
 		id := c.FormValue("id")
 		name := c.FormValue("name")
 		message := c.FormValue("message")
@@ -99,7 +98,7 @@ func main() {
 		c.String(consts.StatusOK, "id: %s; name: %s; message: %s\n", id, name, message)
 	})
 
-	h.POST("/singleFile", func(ctx context.Context, c *app.RequestContext) {
+	h.POST("/singleFile", func(ctx context.Context, c *frame.Context) {
 		// single file
 		file, _ := c.FormFile("file")
 		fmt.Println(file.Filename)
@@ -110,7 +109,7 @@ func main() {
 		c.String(consts.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 
-	h.POST("/multiFile", func(ctx context.Context, c *app.RequestContext) {
+	h.POST("/multiFile", func(ctx context.Context, c *frame.Context) {
 		// Multipart form
 		form, _ := c.MultipartForm()
 		files := form.File["file"]
@@ -128,22 +127,22 @@ func main() {
 	h.Static("/file", "./")
 
 	// custom FS as you wish
-	h.StaticFS("/", &app.FS{})
+	h.StaticFS("/", &frame.FS{})
 
 	// like SimpleHTTPServer
-	h.StaticFS("/try_dir", &app.FS{Root: "./", GenerateIndexPages: true, PathRewrite: app.NewPathSlashesStripper(1)})
+	h.StaticFS("/try_dir", &frame.FS{Root: "./", GenerateIndexPages: true, PathRewrite: server.NewPathSlashesStripper(1)})
 
 	h.StaticFile("/main", "./file/staticFile/main.go")
 
 	// FileAttachment() sets the "content-disposition" header and returns the file as an "attachment".
-	h.GET("/fileAttachment", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/fileAttachment", func(ctx context.Context, c *frame.Context) {
 		// If you use Chinese, need to encode
 		fileName := url.QueryEscape("hertz")
 		c.FileAttachment("./file/download/file.txt", fileName)
 	})
 
 	// File() will return the contents of the file directly
-	h.GET("/file", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/file", func(ctx context.Context, c *frame.Context) {
 		c.File("./file/download/file.txt")
 	})
 	h.Spin()
